@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const { body, validationResult } = require('express-validator');
 const Person = require("../models/personModel");
 
 //@desc Register Person
@@ -6,6 +7,10 @@ const Person = require("../models/personModel");
 //@access public
 
 const createPerson = asyncHandler (async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { name, age } = req.body;
     if (!name || !age) {
         res.status(400);
@@ -31,7 +36,15 @@ const createPerson = asyncHandler (async (req, res) => {
 //@access public
 
 const getPerson = asyncHandler (async (req, res) => {
-    const person = await Person.findById(req.params.user_id);
+    let person;
+    
+    if (req.params.identifier.match(/^[0-9a-fA-F]{24}$/)) {
+        // It's a valid ObjectId, proceed with `findById`
+        person = await Person.findById(req.params.identifier);
+    } else {
+        // It's not a valid ObjectId, proceed with `findOne`
+        person = await Person.findOne({ name: req.params.identifier });
+    }
 
     if (person) {
         res.json(person);
@@ -46,27 +59,47 @@ const getPerson = asyncHandler (async (req, res) => {
 //@access public
 
 const updatePerson = asyncHandler (async (req, res) => {
-    const person = await Person.findById(req.params.user_id);
+    let person;
+    
+    if (req.params.identifier.match(/^[0-9a-fA-F]{24}$/)) {
+        // It's a valid ObjectId, proceed with `findById`
+        person = await Person.findById(req.params.identifier);
+    } else {
+        // It's not a valid ObjectId, proceed with `findOne`
+        person = await Person.findOne({ name: req.params.identifier });
+    }
 
     if (person) {
-        person.name = req.body.name || person.name;
-        person.age = req.body.age || person.age;
-        person.email = req.body.email || person.email;
+        if (req.body.name || req.body.age || req.body.email) {
+            person.name = req.body.name || person.name;
+            person.age = req.body.age || person.age;
+            person.email = req.body.email || person.email;
 
-        const updatedPerson = await person.save();
-        res.json(updatedPerson);
+            const updatedPerson = await person.save();
+            res.json(updatedPerson);
+        } else {
+            res.status(400);
+            throw new Error('No fields to update');
+        }
     } else {
         res.status(404);
         throw new Error('Person not found');
     }
 });
-
 //@desc Delete Person
 //@route DELETE /api/:id
 //@access public
 
 const deletePerson = asyncHandler (async (req, res) => {
-    const person = await Person.findById(req.params.user_id);
+    let person;
+    
+    if (req.params.identifier.match(/^[0-9a-fA-F]{24}$/)) {
+        // It's a valid ObjectId, proceed with `findById`
+        person = await Person.findById(req.params.identifier);
+    } else {
+        // It's not a valid ObjectId, proceed with `findOne`
+        person = await Person.findOne({ name: req.params.identifier });
+    }
 
     if (person) {
         await person.remove();
