@@ -24,6 +24,8 @@ button {
     font-size: 16px;
     background-color: #4CAF50; /* Green */
     color: white;
+    border: none;
+    border-radius: 12px;
 }
 #message {
     margin-top: 20px;
