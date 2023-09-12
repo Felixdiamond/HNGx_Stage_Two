@@ -9,6 +9,9 @@ dotenv.config();
 connectDb();
 const port = process.env.PORT || 3000;
 
+// Serve static files from the "static" directory
+app.use(express.static('static'));
+
 app.use(bodyParser.json());
 
 app.use("/api", require("./routes/personRouter"));
