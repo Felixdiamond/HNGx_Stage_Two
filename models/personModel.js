@@ -7,7 +7,7 @@ const PersonSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        required: true
+        required: false
     },
     email: {
         type: String,

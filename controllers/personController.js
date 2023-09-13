@@ -11,15 +11,15 @@ const createPerson = asyncHandler (async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    const { name, age } = req.body;
-    if (!name || !age) {
+    const { name, age, email } = req.body;
+    if (!name) {
         res.status(400);
-        throw new Error(`All fields are mandatory! name: ${name}, age: ${age}`);
+        throw new Error(`Name field is mandatory! name: ${name}`);
     }
 
     const person = await Person.create({
         name,
-        age,
+        age: req.body.email || null,
         email: req.body.email || null,
     });
 
