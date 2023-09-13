@@ -12,7 +12,6 @@ router.post(
   "/",
   [
     body("name").not().isEmpty().withMessage("Name is required"),
-    body("age").isInt({ gt: -1 }).withMessage("Age must be a positive integer"),
   ],
   createPerson
 );
