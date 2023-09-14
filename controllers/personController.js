@@ -8,18 +8,31 @@ const Person = require("../models/personModel");
 
 const createPerson = asyncHandler (async (req, res) => {
     const errors = validationResult(req);
+    console.log(req.body)
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    const { name } = req.body;
+    const { name, email } = req.body;
     if (!name) {
         res.status(400);
         throw new Error(`Name field is mandatory! name: ${name}`);
     }
 
-    const person = await Person.create({
-        name,
-    });
+    // Check if a person with the same email already exists
+    if (email) {
+        const existingPerson = await Person.findOne({ email });
+        if (existingPerson) {
+            res.status(400);
+            throw new Error('A person with this email already exists');
+        }
+    }
+
+    const personData = { name };
+    if (email !== undefined) {
+        personData.email = email;
+    }
+
+    const person = await Person.create(personData);
 
     if (person) {
         res.status(201).json(person);
@@ -28,6 +41,7 @@ const createPerson = asyncHandler (async (req, res) => {
         throw new Error('Invalid person data');
     }
 });
+
 
 //@desc Fetch Person
 //@route GET /api/:id
@@ -68,7 +82,20 @@ const updatePerson = asyncHandler (async (req, res) => {
     }
 
     if (person) {
-        if (req.body.name) {
+        const { name, email } = req.body;
+        if (name || email) {
+            // Check if a person with the same email already exists
+            if (email) {
+                const existingPerson = await Person.findOne({ email });
+                if (existingPerson && String(existingPerson._id) !== String(person._id)) {
+                    res.status(400);
+                    throw new Error('A person with this email already exists');
+                }
+                person.email = email;
+            }
+            if (name) {
+                person.name = name;
+            }
 
             const updatedPerson = await person.save();
             res.json(updatedPerson);
@@ -81,6 +108,7 @@ const updatePerson = asyncHandler (async (req, res) => {
         throw new Error('Person not found');
     }
 });
+
 //@desc Delete Person
 //@route DELETE /api/:id
 //@access public

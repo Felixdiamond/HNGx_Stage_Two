@@ -12,6 +12,7 @@ router.post(
   "/",
   [
     body("name").not().isEmpty().withMessage("Name is required"),
+    // You can add a validation for the email here if you want
   ],
   createPerson
 );
@@ -21,7 +22,12 @@ router.get("/:identifier", getPerson);
 router.put(
   "/:identifier",
   [
-    body("name").not().isEmpty().withMessage("Name is required"),
+    // The name is no longer required in the update route
+    // because the user might want to update the email only
+    body("name").optional().isString(),
+    // The email is also optional in the update route
+    // because the user might want to update the name only
+    body("email").optional().isEmail(),
   ],
   updatePerson
 );
