@@ -9,7 +9,7 @@ document
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ nam }),
+      body: JSON.stringify({ name }),
     })
       .then((response) => response.json())
       .then((data) => {
