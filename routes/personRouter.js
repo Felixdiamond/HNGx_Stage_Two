@@ -22,7 +22,6 @@ router.put(
   "/:identifier",
   [
     body("name").not().isEmpty().withMessage("Name is required"),
-    body("age").isInt({ gt: -1 }).withMessage("Age must be a positive integer"),
   ],
   updatePerson
 );

@@ -11,7 +11,7 @@ const createPerson = asyncHandler (async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    const { name, age, email } = req.body;
+    const { name } = req.body;
     if (!name) {
         res.status(400);
         throw new Error(`Name field is mandatory! name: ${name}`);
@@ -19,8 +19,6 @@ const createPerson = asyncHandler (async (req, res) => {
 
     const person = await Person.create({
         name,
-        age: req.body.email || null,
-        email: req.body.email || null,
     });
 
     if (person) {
@@ -70,16 +68,13 @@ const updatePerson = asyncHandler (async (req, res) => {
     }
 
     if (person) {
-        if (req.body.name || req.body.age || req.body.email) {
-            person.name = req.body.name || person.name;
-            person.age = req.body.age || person.age;
-            person.email = req.body.email || person.email;
+        if (req.body.name) {
 
             const updatedPerson = await person.save();
             res.json(updatedPerson);
         } else {
             res.status(400);
-            throw new Error('No fields to update');
+            throw new Error('No field to update');
         }
     } else {
         res.status(404);
@@ -102,8 +97,8 @@ const deletePerson = asyncHandler (async (req, res) => {
     }
 
     if (person) {
-        await person.remove();
-        res.json({ message: 'Person removed' });
+        await person.deleteOne();
+        res.json({ message: `${person.name} removed successfully` });
     } else {
         res.status(404);
         throw new Error('Person not found');
